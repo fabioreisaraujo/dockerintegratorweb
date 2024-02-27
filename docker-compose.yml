@@ -1,5 +1,6 @@
 version: '3.3'
 services:
+# this is a name server to php and adminer 
   integratorphpapache-sqlserver:
     build:
       dockerfile: Dockerfile
@@ -9,6 +10,7 @@ services:
     ports:
       - '80:80'
     volumes:
+    # you must create ./data folder to use yours files
       - ./data/html:/var/www/html
       - ./data/logs/apache:/var/log/apache2
     depends_on:
@@ -34,7 +36,9 @@ services:
 
   integrator-postgres:
     image: postgres:14.8-bullseye
+    # this is a name server to php and adminer connection
     container_name: integrator-postgres
+    # this mf need to use to do not stop and continues stopped
     restart: unless-stopped
     tty: true
     ports:
@@ -43,7 +47,8 @@ services:
       - "./data/postgres-data/dbdata:/var/lib/postgresql/data"
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=integrator@2023
+      # please use a great password
+      - POSTGRES_PASSWORD=integrator@123
       - POSTGRES_DB=integrator
 
   integrator-adminer:
