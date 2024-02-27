@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+  integratorphpapache-sqlserver:
+    build:
+      dockerfile: Dockerfile
+      context: ./config/php
+    container_name: integratorphpapache-sqlserver
+    restart: always
+    ports:
+      - '80:80'
+    volumes:
+      - ./data/html:/var/www/html
+      - ./data/logs/apache:/var/log/apache2
+    depends_on:
+      - integrator-adminer
+      - integrator-postgres
+    links:
+      - integrator-adminer
+      - integrator-postgres
+
+  integrator-app:
+    build:
+      context: ./config/app-java
+      dockerfile: Dockerfile
+    container_name: integrator-app
+    ports:
+      - 8080:8080
+    depends_on:
+      - integrator-postgres
+    links:
+      - integrator-postgres
+    env_file:
+      - ./config/app-java/application.properties
+
+  integrator-postgres:
+    image: postgres:14.8-bullseye
+    container_name: integrator-postgres
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./data/postgres-data/dbdata:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=integrator@2023
+      - POSTGRES_DB=integrator
+
+  integrator-adminer:
+    image: adminer
+    container_name: integrator-adminer
+    restart: always
+    ports:
+      - 8090:8080 # expose:container
