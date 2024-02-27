@@ -1,25 +1,3 @@
-# Source
-# https://hub.docker.com/_/php/
-# Docker File Source
-# https://hub.docker.com/_/debian
-
-#How to build
-#sudo docker build -f debian10_apache_php74.Dockerfile . -t debian10_apache_php8
-
-#How use iterative mode
-#sudo docker exec -it debian10_apache_php74:last /bin/bash
-
-#How use iterative mode image
-#sudo docker run -it debian10_apache_php74:last /bin/bash           #only bash
-#sudo docker run -p 80:80 -it debian10_apache_php74:last /bin/bash
-#sudo docker run -d -p 80:80 debian10_apache_php74:last
-
-#Stop all containers
-#sudo docker stop $(sudo docker ps -a -q)
-
-#Remove all containers
-#sudo docker rm $(sudo docker ps -a -q)
-
 #######################################
 FROM debian:10
 
@@ -51,7 +29,6 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc
 #Install update
 RUN apt-get update
 
-
 # Set Timezone
 RUN ln -fs /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
   && apt-get update \
@@ -73,17 +50,8 @@ RUN apt-get -y install php7.4-mbstring
 #PHP Install GD
 RUN apt-get -y install php7.4-gd
 
-#PHP Install PDO SqLite
-#RUN apt-get -y install php7.4-pdo php7.4-pdo-sqlite php7.4-sqlite3
-
-#PHP Install PDO MySQL
-#RUN apt-get -y install php7.4-pdo php7.4-pdo-mysql php7.4-mysql 
-
 #PHP Install PDO PostGress
 RUN apt-get -y install php7.4-pdo php7.4-pgsql
-
-#PHP Install Mongodb ext
-#RUN apt-get -y install php7.4-mongodb
 
 ## -------- Config Apache ----------------
 RUN a2dismod mpm_event
@@ -94,14 +62,6 @@ RUN a2enmod  php7.4
 
 # Enable .htaccess reading
 RUN LANG="en_US.UTF-8" rpl "AllowOverride None" "AllowOverride All" /etc/apache2/apache2.conf
-
-## ------------- LDAP ------------------
-#PHP Install LDAP
-RUN apt-get -y install php7.4-ldap
-
-#Apache2 enebla LDAP
-RUN a2enmod authnz_ldap
-RUN a2enmod ldap
 
 ## ------------- Add-ons ------------------
 #Install GIT
@@ -137,27 +97,6 @@ RUN echo "\n# Security settings"                    >> /etc/php/7.4/apache2/php.
   && echo "session.entropy_file = /dev/urandom"   >> /etc/php/7.4/apache2/php.ini \
   && echo "session.entropy_length = 32"           >> /etc/php/7.4/apache2/php.ini
 
-
-## ------------- X-DEBUG 3.X ------------------
-#PHP Install X-debug
-#RUN apt-get -y install php7.4-xdebug
-
-#PHP X-Degub enable remote debug
-#RUN echo "xdebug.start_with_request=yes" >> /etc/php/7.4/mods-available/xdebug.ini
-#RUN echo "xdebug.mode = develop,coverage,debug" >> /etc/php/7.4/mods-available/xdebug.ini
-
-#PHP X-Degub enable log
-#RUN echo "xdebug.log=/var/log/apache2/xdebug.log" >> /etc/php/7.4/mods-available/xdebug.ini
-
-
-##------------ Install Precondition for Drive SQL Server -----------
-# The installation of Drive SQL Server for PHP on Linux is not so simple.
-# You should combine the PHP version with Drive PDO version with the ODBC version
-# with the SQL Server version. Complete information on:
-# https://docs.microsoft.com/pt-br/sql/connect/php/installation-tutorial-linux-mac?view=sql-server-2017#installing-the-drivers-on-debian-8-and-9
-#
-# This installation works with Debian 10, PHP 7.4, Drive PDO_SQLSRV 5.6.1, Microsoft ODBC Driver 17 for SQL Server , MS SQL Server 2008 R2 or higher
-
 RUN apt-get -y install php7.4-dev php7.4-xml php7.4-intl
 
 ENV ACCEPT_EULA=Y
@@ -183,7 +122,6 @@ RUN exec bash
 RUN apt-get -y install unixodbc unixodbc-dev
 RUN apt-get -y install gcc g++ make autoconf libc-dev pkg-config
 
-
 ##------------ Install Drive 5.9.0 for SQL Server -----------
 # List version drive PDO https://pecl.php.net/package/pdo_sqlsrv
 # Install Drive: https://docs.microsoft.com/pt-br/sql/connect/php/installation-tutorial-linux-mac?view=sql-server-2017
@@ -199,8 +137,6 @@ RUN echo extension=sqlsrv.so >> `php --ini | grep "Scan for additional .ini file
 RUN echo "extension=pdo_sqlsrv.so" >> /etc/php/7.4/apache2/conf.d/30-pdo_sqlsrv.ini
 RUN echo "extension=sqlsrv.so" >> /etc/php/7.4/apache2/conf.d/20-sqlsrv.ini
 
-#RUN phpenmod -v 7.3 sqlsrv pdo_sqlsrv
-#RUN apt-get install libapache2-mod-php7.3 apache2
 RUN a2dismod mpm_event
 RUN a2enmod mpm_prefork
 RUN a2enmod php7.4
